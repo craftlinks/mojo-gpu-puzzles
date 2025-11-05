@@ -16,7 +16,8 @@ fn add_10_guard(
     size: Int,
 ):
     i = thread_idx.x
-    # FILL ME IN (roughly 2 lines)
+    if i < UInt(size):
+        output[i] = a[i] + 10
 
 
 # ANCHOR_END: add_10_guard
@@ -30,9 +31,12 @@ def main():
             for i in range(SIZE):
                 a_host[i] = i
 
-        ctx.enqueue_function[add_10_guard](
-            out.unsafe_ptr(),
-            a.unsafe_ptr(),
+        c_add_10_guard = ctx.compile_function_checked[add_10_guard, add_10_guard]()
+
+        ctx.enqueue_function_checked(
+            c_add_10_guard,
+            out,
+            a,
             SIZE,
             grid_dim=BLOCKS_PER_GRID,
             block_dim=THREADS_PER_BLOCK,
