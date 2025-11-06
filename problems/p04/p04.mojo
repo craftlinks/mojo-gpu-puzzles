@@ -15,9 +15,15 @@ fn add_10_2d(
     a: UnsafePointer[Scalar[dtype]],
     size: Int,
 ):
+    u_size = UInt(size)
+
     row = thread_idx.y
     col = thread_idx.x
-    # FILL ME IN (roughly 2 lines)
+
+    idx = row * u_size + col
+
+    if row < u_size and col < u_size:
+        output[idx] = a[idx] + 10
 
 
 # ANCHOR_END: add_10_2d
@@ -37,9 +43,12 @@ def main():
                     a_host[i * SIZE + j] = i * SIZE + j
                     expected[i * SIZE + j] = a_host[i * SIZE + j] + 10
 
-        ctx.enqueue_function[add_10_2d](
-            out.unsafe_ptr(),
-            a.unsafe_ptr(),
+        c_add_10_2d = ctx.compile_function_checked[add_10_2d, add_10_2d]()
+
+        ctx.enqueue_function_checked(
+            c_add_10_2d,
+            out,
+            a,
             SIZE,
             grid_dim=BLOCKS_PER_GRID,
             block_dim=THREADS_PER_BLOCK,

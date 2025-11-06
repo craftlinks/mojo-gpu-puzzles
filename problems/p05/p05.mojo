@@ -18,7 +18,12 @@ fn broadcast_add(
 ):
     row = thread_idx.y
     col = thread_idx.x
-    # FILL ME IN (roughly 2 lines)
+    if row >= UInt(size) or col >= UInt(size):
+        return
+
+    idx = row * UInt(size) + col
+
+    output[idx] = a[col] + b[row]
 
 
 # ANCHOR_END: broadcast_add
